@@ -42,8 +42,8 @@ struct VoxelHash {
 }  // namespace
 
 namespace kiss_icp {
-std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> &frame,
-                                             double voxel_size) {
+std::vector<Eigen::Vector3d> Downsample(const std::vector<Eigen::Vector3d> &frame,
+                                        double voxel_size) {
     tsl::robin_map<Voxel, Eigen::Vector3d, VoxelHash> grid;
     grid.reserve(frame.size());
     for (const auto &point : frame) {
@@ -56,6 +56,27 @@ std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> 
     for (const auto &[voxel, point] : grid) {
         (void)voxel;
         frame_dowsampled.emplace_back(point);
+    }
+    return frame_dowsampled;
+}
+
+std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> &frame,
+                                             double voxel_size) {
+    tsl::robin_map<Voxel, std::vector<Eigen::Vector3d>, VoxelHash> grid;
+    grid.reserve(frame.size());
+    for (const auto &point : frame) {
+        const auto voxel = Voxel((point / voxel_size).cast<int>());
+        grid[voxel].push_back(point);
+    }
+    std::vector<Eigen::Vector3d> frame_dowsampled;
+    for (const auto &[voxel, points] : grid) {
+        std::vector<Eigen::Vector3d> subframe;
+        if (points.size() < 20) {
+            subframe = Downsample(points, voxel_size * 0.5);
+            frame_dowsampled.insert(frame_dowsampled.end(), subframe.begin(), subframe.end());
+        } else {
+            frame_dowsampled.push_back(points.at(0));
+        }
     }
     return frame_dowsampled;
 }
