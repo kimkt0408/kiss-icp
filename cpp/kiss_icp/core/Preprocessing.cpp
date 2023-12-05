@@ -28,7 +28,9 @@
 #include <Eigen/Core>
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <sophus/se3.hpp>
+#include <unordered_set>
 #include <vector>
 
 namespace {
@@ -39,41 +41,45 @@ struct VoxelHash {
         return ((1 << 20) - 1) & (vec[0] * 73856093 ^ vec[1] * 19349663 ^ vec[2] * 83492791);
     }
 };
+
+using VoxelSet = std::unordered_set<Voxel, VoxelHash>;
+using VoxelGrid = tsl::robin_map<Voxel, std::vector<Eigen::Vector3d>, VoxelHash>;
+
+inline std::vector<Eigen::Vector3d> Downsample(const std::vector<Eigen::Vector3d> &frame,
+                                               double voxel_size) {
+    VoxelSet grid;
+    std::vector<Eigen::Vector3d> frame_dowsampled;
+    frame_dowsampled.reserve(frame.size());
+    for (const auto &point : frame) {
+        const auto voxel = Voxel((point / voxel_size).cast<int>());
+        if (grid.emplace(voxel).second) {
+            frame_dowsampled.emplace_back(point);
+        }
+    }
+    frame_dowsampled.shrink_to_fit();
+    return frame_dowsampled;
+}
 }  // namespace
 
 namespace kiss_icp {
-std::vector<Eigen::Vector3d> Downsample(const std::vector<Eigen::Vector3d> &frame,
-                                        double voxel_size) {
-    tsl::robin_map<Voxel, Eigen::Vector3d, VoxelHash> grid;
-    grid.reserve(frame.size());
-    for (const auto &point : frame) {
-        const auto voxel = Voxel((point / voxel_size).cast<int>());
-        if (grid.contains(voxel)) continue;
-        grid.insert({voxel, point});
-    }
-    std::vector<Eigen::Vector3d> frame_dowsampled;
-    frame_dowsampled.reserve(grid.size());
-    for (const auto &[voxel, point] : grid) {
-        (void)voxel;
-        frame_dowsampled.emplace_back(point);
-    }
-    return frame_dowsampled;
-}
 
 std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> &frame,
-                                             double voxel_size) {
-    tsl::robin_map<Voxel, std::vector<Eigen::Vector3d>, VoxelHash> grid;
+                                             double voxel_size,
+                                             size_t max_points_per_voxel) {
+    VoxelGrid grid;
     grid.reserve(frame.size());
     for (const auto &point : frame) {
-        const auto voxel = Voxel((point / voxel_size).cast<int>());
-        grid[voxel].push_back(point);
+        const auto voxel = Voxel((point / (1.5 * voxel_size)).cast<int>());
+        grid[voxel].reserve(max_points_per_voxel);
+        if (grid.at(voxel).size() > max_points_per_voxel) continue;
+        grid.at(voxel).emplace_back(point);
     }
     std::vector<Eigen::Vector3d> frame_dowsampled;
     for (const auto &[voxel, points] : grid) {
         std::vector<Eigen::Vector3d> subframe;
-        if (points.size() < 20) {
-            subframe = Downsample(points, voxel_size * 0.5);
-            frame_dowsampled.insert(frame_dowsampled.end(), subframe.begin(), subframe.end());
+        if (points.size() < max_points_per_voxel) {
+            subframe = Downsample(points, 0.5 * voxel_size);
+            frame_dowsampled.insert(frame_dowsampled.end(), points.begin(), points.end());
         } else {
             frame_dowsampled.push_back(points.at(0));
         }

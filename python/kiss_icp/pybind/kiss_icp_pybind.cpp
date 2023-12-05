@@ -111,7 +111,8 @@ PYBIND11_MODULE(kiss_icp_pybind, m) {
         "frame"_a, "timestamps"_a, "start_pose"_a, "finish_pose"_a);
 
     // prerpocessing modules
-    m.def("_voxel_down_sample", &VoxelDownsample, "frame"_a, "voxel_size"_a);
+    m.def("_voxel_down_sample", &VoxelDownsample, "frame"_a, "voxel_size"_a,
+          "max_points_per_voxel"_a);
     m.def("_preprocess", &Preprocess, "frame"_a, "max_range"_a, "min_range"_a);
     m.def("_correct_kitti_scan", &CorrectKITTIScan, "frame"_a);
 

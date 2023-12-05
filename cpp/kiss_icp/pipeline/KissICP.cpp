@@ -82,8 +82,10 @@ KissICP::Vector3dVectorTuple KissICP::RegisterFrame(const std::vector<Eigen::Vec
 
 KissICP::Vector3dVectorTuple KissICP::Voxelize(const std::vector<Eigen::Vector3d> &frame) const {
     const auto voxel_size = config_.voxel_size;
-    const auto frame_downsample = kiss_icp::VoxelDownsample(frame, voxel_size * 0.5);
-    const auto source = kiss_icp::VoxelDownsample(frame_downsample, voxel_size * 1.5);
+    const auto max_points_per_voxel = config_.max_points_per_voxel;
+    const auto frame_downsample =
+        kiss_icp::VoxelDownsample(frame, voxel_size, max_points_per_voxel);
+    const auto source = frame_downsample;
     return {source, frame_downsample};
 }
 

@@ -48,7 +48,7 @@ class KissICP:
         frame = self.preprocess(frame)
 
         # Voxelize
-        source, frame_downsample = self.voxelize(frame)
+        frame_downsample = voxel_down_sample(frame, self.config.mapping)
 
         # Get motion prediction and adaptive_threshold
         sigma = self.get_adaptive_threshold()
@@ -60,7 +60,7 @@ class KissICP:
 
         # Run ICP
         new_pose = register_frame(
-            points=source,
+            points=frame_downsample,
             voxel_map=self.local_map,
             initial_guess=initial_guess,
             max_correspondance_distance=3 * sigma,
@@ -70,12 +70,7 @@ class KissICP:
         self.adaptive_threshold.update_model_deviation(np.linalg.inv(initial_guess) @ new_pose)
         self.local_map.update(frame_downsample, new_pose)
         self.poses.append(new_pose)
-        return frame, source
-
-    def voxelize(self, iframe):
-        frame_downsample = voxel_down_sample(iframe, self.config.mapping.voxel_size * 0.5)
-        # source = voxel_down_sample(frame_downsample, self.config.mapping.voxel_size * 1.5)
-        return frame_downsample, frame_downsample
+        return frame, frame_downsample
 
     def get_adaptive_threshold(self):
         return (
