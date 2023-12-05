@@ -74,7 +74,7 @@ std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> 
         if (grid.at(voxel).size() > max_points_per_voxel) continue;
         grid.at(voxel).emplace_back(point);
     }
-    std::vector<Eigen::Vector3d> frame_dowsampled;
+    std::vector<Eigen::Vector3d> frame_dowsampled(grid.size() * 8);
     for (const auto &[voxel, points] : grid) {
         std::vector<Eigen::Vector3d> subframe;
         if (points.size() < max_points_per_voxel) {
@@ -84,6 +84,7 @@ std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> 
             frame_dowsampled.push_back(points.at(0));
         }
     }
+    frame_dowsampled.shrink_to_fit();
     return frame_dowsampled;
 }
 
