@@ -45,8 +45,8 @@ struct VoxelHash {
 using VoxelSet = std::unordered_set<Voxel, VoxelHash>;
 using VoxelGrid = tsl::robin_map<Voxel, std::vector<Eigen::Vector3d>, VoxelHash>;
 
-inline std::vector<Eigen::Vector3d> Downsample(const std::vector<Eigen::Vector3d> &frame,
-                                               double voxel_size) {
+std::vector<Eigen::Vector3d> Downsample(const std::vector<Eigen::Vector3d> &frame,
+                                        double voxel_size) {
     VoxelSet grid;
     std::vector<Eigen::Vector3d> frame_dowsampled;
     frame_dowsampled.reserve(frame.size());
@@ -74,14 +74,15 @@ std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> 
         if (grid.at(voxel).size() > max_points_per_voxel) continue;
         grid.at(voxel).emplace_back(point);
     }
-    std::vector<Eigen::Vector3d> frame_dowsampled(grid.size() * 8);
+    std::vector<Eigen::Vector3d> frame_dowsampled;
+    frame_dowsampled.reserve(grid.size() * 8);
     for (const auto &[voxel, points] : grid) {
         std::vector<Eigen::Vector3d> subframe;
         if (points.size() < max_points_per_voxel) {
             subframe = Downsample(points, 0.5 * voxel_size);
             frame_dowsampled.insert(frame_dowsampled.end(), points.begin(), points.end());
         } else {
-            frame_dowsampled.push_back(points.at(0));
+            frame_dowsampled.emplace_back(points.at(0));
         }
     }
     frame_dowsampled.shrink_to_fit();
