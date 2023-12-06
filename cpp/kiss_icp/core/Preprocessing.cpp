@@ -80,7 +80,7 @@ std::vector<Eigen::Vector3d> VoxelDownsample(const std::vector<Eigen::Vector3d> 
         std::vector<Eigen::Vector3d> subframe;
         if (points.size() < max_points_per_voxel) {
             subframe = Downsample(points, 0.5 * voxel_size);
-            frame_dowsampled.insert(frame_dowsampled.end(), points.begin(), points.end());
+            frame_dowsampled.insert(frame_dowsampled.end(), subframe.begin(), subframe.end());
         } else {
             frame_dowsampled.emplace_back(points.at(0));
         }
