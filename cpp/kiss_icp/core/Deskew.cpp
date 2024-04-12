@@ -30,7 +30,8 @@
 
 namespace {
 /// TODO(Nacho) Explain what is the very important meaning of this param
-constexpr double mid_pose_timestamp{0.5};
+// constexpr double mid_pose_timestamp{0.5};
+constexpr double mid_pose_timestamp{0.0};
 }  // namespace
 
 namespace kiss_icp {
