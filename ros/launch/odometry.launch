@@ -2,7 +2,8 @@
 <launch>
   <!-- ROS paramaters -->
   <!-- <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-11-16-29.bag"/> -->
-  <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-12-33-19.bag"/>
+  <!-- <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-12-33-19.bag"/> -->
+  <arg name="bagfile" default=""/> 
   <arg name="visualize" default="true"/>
   <arg name="odom_frame" default="odom"/>
   <arg name="base_frame" default="velodyne1"/>
@@ -10,10 +11,16 @@
   <arg name="publish_odom_tf" default="true"/>
 
   <!-- KISS-ICP paramaters -->
-  <arg name="deskew" default="true"/>
+  <arg name="deskew" default="false"/>
   <arg name="max_range" default="20.0" />
   <arg name="min_range" default="0.0" />
   <arg name="voxel_size" default="0.2" />
+
+
+  <!-- <arg name="deskew" default="false"/>
+  <arg name="max_range" default="20.0" />
+  <arg name="min_range" default="0.0" />
+  <arg name="voxel_size" default="0.2" /> -->
 
   <!-- Odometry node -->
   <node pkg="kiss_icp" type="odometry_node" name="odometry_node" output="screen">
