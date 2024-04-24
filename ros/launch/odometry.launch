@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <!-- ROS paramaters -->
-  <!-- <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-11-16-29.bag"/> -->
-  <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-12-33-19.bag"/>
+  <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-11-16-29.bag"/>
+  <!-- <arg name="bagfile" default="/home/kimkt0408/bagfiles/2023-09-21-12-33-19.bag"/> -->
   <!-- <arg name="bagfile" default=""/>  -->
   <arg name="visualize" default="true"/>
   <arg name="odom_frame" default="odom"/>
@@ -46,8 +46,11 @@
   </group>
 
   <!-- Visualizer -->
-  <group if="$(arg visualize)">
+  <!-- <group if="$(arg visualize)">
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find kiss_icp)/rviz/kiss_icp_ros1.rviz"/>
-  </group>
+  </group> -->
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_velodyne1" args="-0.155 0 0.402 -3.141592653 0 0 base_link velodyne1" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_velodyne2" args="-0.266 0 0.292 1.570796327 0 -1.570796327 base_link velodyne2" />
 
 </launch>

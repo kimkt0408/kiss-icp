@@ -168,6 +168,7 @@ void OdometryServer::PublishOdometry(const Sophus::SE3d &pose,
     nav_msgs::Odometry odom_msg;
     odom_msg.header.stamp = stamp;
     odom_msg.header.frame_id = odom_frame_;
+    odom_msg.child_frame_id = base_frame_;
     odom_msg.pose.pose = tf2::sophusToPose(pose);
     odom_publisher_.publish(odom_msg);
 }
